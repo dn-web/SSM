@@ -27,6 +27,7 @@ public class UserController {
         mv.addObject("tip", tip);
         mv.setViewName("show");
         System.out.println("master test");
+        System.out.println("hot-fix test");
         return mv;
     }
 
