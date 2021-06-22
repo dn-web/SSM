@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--  spring配置文件：声明service、dao、工具类等对象  -->
+
+    <!--  加载属性配置文件  -->
+    <context:property-placeholder location="classpath:conf/jdbc.properties" />
+
+    <!-- 声明数据源，连接数据库   -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close" >
+        <!--   使用set注入给DruidDataSource提供连接数据库信息【给DruidDataSource类中的属性赋值】     -->
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+    </bean>
+
+    <!--  声明mybatis中提供的SqlSessionFactoryBean类  -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--    使用set注入，把数据库连接池赋值给了dataSource属性    -->
+        <property name="dataSource" ref="dataSource" />
+        <!--
+            加载指定mybatis主配置文件的位置【主要是加载mapper文件】
+            configLocation属性是Resource类型的，对它的赋值，使用的是value，value值为指定文件的路径
+        -->
+        <property name="configLocation" value="classpath:conf/mybatis.xml" />
+    </bean>
+
+    <!-- 创建dao对象 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--   指定SqlSessionFactory对象的id，sqlSessionFactoryBeanName是String简单类型，所以用set注入的value方式赋值     -->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+        <!--
+            指定包名，包名是dao接口所在的包名
+            MapperScannerConfigurer会扫描这个包中的所有接口，对每个接口都执行一次getMapper()方法，得到每个dao接口的实现类对象
+            创建好的dao接口实现类对象是放入到spring的容器中的【对象名称默认是对应的dao接口首字母小写】
+        -->
+        <property name="basePackage" value="cn.xyh.dao" />
+    </bean>
+
+    <!--  声明组件扫描器【注解方式创建service层对象】  -->
+    <context:component-scan base-package="cn.xyh.service" />
+
+
+
+</beans>
